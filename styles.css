@@ -117,3 +117,7 @@ select:focus {
 .count {
   color: #6feaf6;
 }
+
+.wrap {
+  perspective: 700px;
+}
