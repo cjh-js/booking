@@ -3,32 +3,63 @@ const seatjs = document.querySelector('.seatjs');
 const seats = seatjs.querySelectorAll('.seat');
 const seatNum = document.querySelector('.seatCount');
 const money = document.querySelector('.moneyCount');
-let selectSeats = 0;
 
-// Functions
-function showSeats(seatNumber){
-    seatNum.innerText = `${seatNumber}`;
+loadData();
+
+let ticket = select.value;
+
+// Save Data
+function setMovieData(movie, price){
+    localStorage.setItem('selectedMovie', movie);
+    localStorage.setItem('selectedMovieCost', price);
 }
 
-function handleChange(seats){
-    let price = select.value;
-    money.innerText = price*seatNum.innerText;
+function updateCountPrice(){
+    const selectedSeats = seatjs.querySelectorAll('.seat.selected');
+
+    const seatsIndex = [...selectedSeats].map(seat => [...seats].indexOf(seat));
+    localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex));
+
+    const seatCount = selectedSeats.length;
+
+    seatNum.innerText = seatCount;
+    money.innerText = seatCount * ticket;
+
+    setMovieData(select.selectedIndex, select.value);
 }
 
-// EventListener
-seats.forEach((seat) => {
+// Load Data
+function loadData(){
+    const selectedSeats = JSON.parse(localStorage.getItem('selectedSeats'));
+    if(selectedSeats !== null && selectedSeats.length > 0){
+        seats.forEach((seat, index) => {
+            if(selectedSeats.indexOf(index) > -1){
+                seat.classList.add('selected');
+            }
+        });
+    }
+
+    const selectedMovie = localStorage.getItem('selectedMovie');
+    if(selectedMovie !== null){
+        select.selectedIndex = selectedMovie;
+    }
+}
+
+// Event Listeners
+select.addEventListener('change', (e) => {
+    ticket = +e.target.value;
+    setMovieData(e.target.selectedIndex, e.target.value);
+    updateCountPrice();
+});
+
+seats.forEach((seat, index) => {
     seat.addEventListener('click', (e) => {
-        const divSeat = e.target;
-        if(divSeat.className === 'seat'){
-            divSeat.classList.add('selected');
-            selectSeats++;
-        } else if(divSeat.className === 'seat selected'){
-            divSeat.classList.remove('selected');
-            selectSeats--;
+        if(e.target.classList.contains('seat') && !e.target.classList.contains('occupied')){
+            e.target.classList.toggle('selected');
+            updateCountPrice();
         }
-        showSeats(selectSeats);
-        handleChange(selectSeats);
     });
 });
 
-select.addEventListener('change', handleChange);
+// Call Initial Settings
+updateCountPrice();
